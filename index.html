@@ -6,7 +6,7 @@
     <title>AMD Sustainability Validator 2.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- COLOR VARIABLES --- */
+        /* --- VARIABILI COLORI --- */
         :root {
             --primary-orange: #ff6900;
             --primary-hover: #e05500;
@@ -414,7 +414,7 @@
             if(col.shoe === -1 && headers.length > 37) col.shoe = 37;
 
             // Output Config
-            const out = [["Config SKU", "Sustainability Label", "Textile Outer", "Shoe Outer", "Component", "Cert. Level", "% Content", "Issue (Report)", "Validation Result", "Action Required", "Marked Sust.", "Cert Num", "Test Inst"]];
+            const out = [["Config SKU", "Sustainability Label", "Component", "Cert. Level", "% Content", "Issue (Report)", "Validation Result", "Reason / Action", "Marked Sust.", "Cert Num"]];
             let brand = "000";
             const seenConfigs = new Set(); 
 
@@ -444,7 +444,7 @@
                     marked: col.marked > -1 ? row[col.marked] : "",
                     cert: col.cert > -1 ? row[col.cert] : "",
                     test: col.test > -1 ? row[col.test] : "",
-                    // Extra for deep dive
+                    // Extra for deep dive (Read by code, but not displayed in table)
                     sole: col.shoe_sole > -1 ? row[col.shoe_sole] : "",
                     outsole: col.shoe_outsole > -1 ? row[col.shoe_outsole] : "",
                     inner: col.shoe_inner > -1 ? row[col.shoe_inner] : "",
@@ -452,7 +452,7 @@
                     t_inner: col.tex_inner > -1 ? row[col.tex_inner] : ""
                 };
                 
-                let res = "OK", act = "";
+                let res = "OK", act = "No structural error found.";
 
                 // SMART ACTIONS LOGIC
                 if (mode === 'STANDARD') {
@@ -504,18 +504,24 @@
                     // Combine ALL material text to check content
                     let allMatText = (vals.text + " " + vals.shoe + " " + vals.sole + " " + vals.outsole + " " + vals.inner + " " + vals.t_lining + " " + vals.t_inner).toUpperCase();
 
+                    // UNIVERSAL CHECK FOR MULTI-COMPONENTS IN MATERIAL FIELD
                     if (vals.comp && vals.comp.toUpperCase().includes("FULL")) {
-                        // Check if LWG is claimed
-                        if (vals.label && vals.label.toUpperCase().includes("LWG")) {
-                            // Rule: Fail if Mixed Materials (Textile, Synthetic, Rubber, +) are found anywhere
-                            if (allMatText.includes("TEXTILE") || allMatText.includes("SYNTHETIC") || allMatText.includes("RUBBER") || allMatText.includes("SOLE") || allMatText.includes("+") || allMatText.includes("POLY")) {
-                                res = "FAIL (F)";
-                                act = "Full Product claim invalid on Mixed Materials (Textile/Rubber/Sole detected).";
-                            }
-                            // Fallback: Fail if Textile column is explicitly filled
-                            else if (vals.text && vals.text.length > 2) {
-                                res = "FAIL (F)";
-                                act = "Full Product Mismatch (Textile column filled).";
+                        
+                        if (allMatText.includes("LINING") || allMatText.includes("WAISTBAND") || allMatText.includes("SOLE") || allMatText.includes("FILLING") || allMatText.includes("TRIM") || allMatText.includes("POCKET")) {
+                             res = "FAIL (F)";
+                             act = "Full Product claim invalid. Multiple components detected (Lining/Waistband/etc).";
+                        }
+                        
+                        // SPECIFIC CHECK FOR NATURAL LABELS
+                        else if (vals.label) {
+                            let labelUp = vals.label.toUpperCase();
+                            let isNaturalLabel = labelUp.includes("LWG") || labelUp.includes("LEATHER") || labelUp.includes("GOTS") || labelUp.includes("OCS") || labelUp.includes("REGENAGRI") || labelUp.includes("COTTON");
+                            
+                            if (isNaturalLabel) {
+                                if (allMatText.includes("POLYESTER") || allMatText.includes("POLYAMIDE") || allMatText.includes("ELASTANE") || allMatText.includes("ACRYLIC") || allMatText.includes("RUBBER") || allMatText.includes("NYLON")) {
+                                     res = "FAIL (F)";
+                                     act = "Full Product claim invalid. Synthetic mix detected in Natural Label.";
+                                }
                             }
                         }
                     }
@@ -535,7 +541,7 @@
                     }
                 }
 
-                out.push([sku13, vals.label, vals.text, vals.shoe, vals.comp, vals.level, vals.pct, repIssue, res, act, vals.marked, vals.cert, vals.test]);
+                out.push([sku13, vals.label, vals.comp, vals.level, vals.pct, repIssue, res, act, vals.marked, vals.cert]);
             }
 
             return { data: out, brandCode: brand };
@@ -568,8 +574,8 @@
             thead.appendChild(trH); t.appendChild(thead);
 
             const tbody = document.createElement('tbody');
-            const max = Math.min(data.length, 100); 
-            for(let i=1; i<max; i++) {
+            // REMOVED THE 100 ROW LIMIT
+            for(let i=1; i<data.length; i++) {
                 const tr = document.createElement('tr');
                 data[i].forEach((c, idx) => {
                     const td = document.createElement('td'); 
@@ -578,7 +584,7 @@
                     let str = String(c);
                     if(str.includes("FAIL")) td.innerHTML = `<span class="tag-fail">FAIL</span> ${str.replace("FAIL","")}`;
                     if(str.includes("WARN")) td.innerHTML = `<span class="tag-warn">WARN</span> ${str.replace("WARN","")}`;
-                    if(idx === 9 && c !== "") td.className = "text-action"; 
+                    if(idx === 7) td.className = "text-action"; 
                     
                     tr.appendChild(td);
                 });
