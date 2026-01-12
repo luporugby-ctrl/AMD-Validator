@@ -131,12 +131,12 @@
                 <div class="step-card">
                     <div class="step-number">2</div>
                     <div class="step-title">Upload Files</div>
-                    <div class="step-desc">Go to the <strong>Validator Tool</strong> tab. Drag & drop the AMD CSV and the <strong>Invalid SKU Report</strong> into the upload boxes.</div>
+                    <div class="step-desc">Go to the <strong>Validator Tool</strong> tab. Drag & drop both CSV files into the upload boxes.</div>
                 </div>
                 <div class="step-card">
                     <div class="step-number">3</div>
                     <div class="step-title">Run Analysis</div>
-                    <div class="step-desc">Click <strong>Standard Analysis</strong> for general issues (A-E) or <strong>Issue F</strong> for deep dive checks (Mixed Materials, etc.).</div>
+                    <div class="step-desc">Click <strong>Standard Analysis</strong> for general issues (A-E) or <strong>Issue F</strong> for deep dive checks.</div>
                 </div>
                 <div class="step-card">
                     <div class="step-number">4</div>
@@ -386,8 +386,10 @@
             }
             const headers = amdRows[hIdx].map(h => h.trim().toUpperCase());
 
-            // D. Map Columns
-            const col = { sku:-1, label:-1, textile:-1, shoe:-1, comp:-1, level:-1, pct:-1, marked:-1, cert:-1, test:-1 };
+            // D. Map Columns (Include ALL Material columns for deep dive)
+            const col = { sku:-1, label:-1, textile:-1, shoe:-1, comp:-1, level:-1, pct:-1, marked:-1, cert:-1, test:-1,
+                          shoe_sole:-1, shoe_outsole:-1, shoe_inner:-1, tex_lining:-1, tex_inner:-1 };
+            
             headers.forEach((h, k) => {
                 if(h.includes("CONFIG SKU") || h.includes("SIMPLE-SKU")) col.sku = k;
                 else if(h.includes("SUSTAINABILITY LABEL")) col.label = k;
@@ -399,6 +401,13 @@
                 else if(h.includes("MARKED AS SUSTAINABLE")) col.marked = k;
                 else if(h.includes("CERTIFICATION") && h.includes("NUMBER")) col.cert = k;
                 else if(h.includes("TESTING INSTITUTE")) col.test = k;
+                
+                // Extra Material Cols for Deep Dive
+                else if(h.includes("SHOE SOLE")) col.shoe_sole = k;
+                else if(h.includes("SHOE OUTSOLE")) col.shoe_outsole = k;
+                else if(h.includes("SHOE INNER")) col.shoe_inner = k;
+                else if(h.includes("TEXTILE INNER LINING")) col.tex_lining = k;
+                else if(h.includes("TEXTILE INNER MATERIAL")) col.tex_inner = k;
             });
 
             if(col.textile === -1 && headers.length > 33) col.textile = 33;
@@ -434,7 +443,13 @@
                     pct: col.pct > -1 ? row[col.pct] : "0",
                     marked: col.marked > -1 ? row[col.marked] : "",
                     cert: col.cert > -1 ? row[col.cert] : "",
-                    test: col.test > -1 ? row[col.test] : ""
+                    test: col.test > -1 ? row[col.test] : "",
+                    // Extra for deep dive
+                    sole: col.shoe_sole > -1 ? row[col.shoe_sole] : "",
+                    outsole: col.shoe_outsole > -1 ? row[col.shoe_outsole] : "",
+                    inner: col.shoe_inner > -1 ? row[col.shoe_inner] : "",
+                    t_lining: col.tex_lining > -1 ? row[col.tex_lining] : "",
+                    t_inner: col.tex_inner > -1 ? row[col.tex_inner] : ""
                 };
                 
                 let res = "OK", act = "";
@@ -481,20 +496,21 @@
                 } else {
                     // ISSUE F - DEEP DIVE WITH MIXED MATERIAL CHECK (RULE 21)
                     let mats = 0;
+                    // Generic count of filled material columns (approximate range)
                     for(let c=33; c<=51; c++) { 
                         if(row[c] && row[c].trim().length > 2) mats++; 
                     }
                     
-                    // Combine material text to check content
-                    let allMatText = (vals.text + " " + vals.shoe).toUpperCase();
+                    // Combine ALL material text to check content
+                    let allMatText = (vals.text + " " + vals.shoe + " " + vals.sole + " " + vals.outsole + " " + vals.inner + " " + vals.t_lining + " " + vals.t_inner).toUpperCase();
 
                     if (vals.comp && vals.comp.toUpperCase().includes("FULL")) {
                         // Check if LWG is claimed
                         if (vals.label && vals.label.toUpperCase().includes("LWG")) {
-                            // Rule: Fail if Mixed Materials (Textile, Synthetic, +) are found
-                            if (allMatText.includes("TEXTILE") || allMatText.includes("SYNTHETIC") || allMatText.includes("+") || allMatText.includes("POLY")) {
+                            // Rule: Fail if Mixed Materials (Textile, Synthetic, Rubber, +) are found anywhere
+                            if (allMatText.includes("TEXTILE") || allMatText.includes("SYNTHETIC") || allMatText.includes("RUBBER") || allMatText.includes("SOLE") || allMatText.includes("+") || allMatText.includes("POLY")) {
                                 res = "FAIL (F)";
-                                act = "Full Product claim invalid on Mixed Materials (Textile/Synth/Mix detected).";
+                                act = "Full Product claim invalid on Mixed Materials (Textile/Rubber/Sole detected).";
                             }
                             // Fallback: Fail if Textile column is explicitly filled
                             else if (vals.text && vals.text.length > 2) {
