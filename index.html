@@ -3,157 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMD Sustainability Validator 2.0</title>
+    <title>AMD Sustainability Validator 2.0 (Smart Actions)</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- COLOR VARIABLES --- */
+        /* --- STYLES (Invariati) --- */
         :root {
-            --primary-orange: #ff6900;
-            --primary-hover: #e05500;
+            --primary-orange: #ff6900; --primary-hover: #e05500;
             --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-            --card-white: #ffffff;
-            --text-dark: #2d3436;
-            --text-light: #636e72;
-            
-            /* Pastel Palette */
-            --pastel-red: #ffebee;
-            --pastel-orange: #fff3e0;
-            --pastel-grey: #f5f6fa;
-            
+            --card-white: #ffffff; --text-dark: #2d3436; --text-light: #636e72;
+            --pastel-red: #ffebee; --pastel-orange: #fff3e0; --pastel-grey: #f5f6fa;
             --shadow-soft: 0 10px 30px rgba(0,0,0,0.05);
             --shadow-hover: 0 20px 40px rgba(255, 105, 0, 0.15);
         }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg-gradient);
-            margin: 0; padding: 40px;
-            color: var(--text-dark);
-            min-height: 100vh;
-        }
-
-        .container {
-            background: var(--card-white);
-            max-width: 1200px;
-            margin: 0 auto;
-            border-radius: 24px;
-            box-shadow: var(--shadow-soft);
-            overflow: hidden;
-            min-height: 85vh;
-            position: relative;
-        }
-
-        /* --- HEADER & TABS --- */
-        .header-title {
-            text-align: center; padding: 30px 0 10px;
-            color: var(--primary-orange); font-weight: 700; letter-spacing: -0.5px;
-        }
-
-        .tabs {
-            display: flex; justify-content: center;
-            background: white; padding: 10px 20px 0; border-bottom: 1px solid #f0f0f0;
-        }
-
-        .tab {
-            padding: 15px 30px; cursor: pointer; font-weight: 500; color: var(--text-light);
-            transition: all 0.3s; border-radius: 12px 12px 0 0; margin: 0 5px; position: relative;
-        }
-
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-gradient); margin: 0; padding: 40px; color: var(--text-dark); min-height: 100vh; }
+        .container { background: var(--card-white); max-width: 1200px; margin: 0 auto; border-radius: 24px; box-shadow: var(--shadow-soft); overflow: hidden; min-height: 85vh; position: relative; }
+        .header-title { text-align: center; padding: 30px 0 10px; color: var(--primary-orange); font-weight: 700; letter-spacing: -0.5px; }
+        .tabs { display: flex; justify-content: center; background: white; padding: 10px 20px 0; border-bottom: 1px solid #f0f0f0; }
+        .tab { padding: 15px 30px; cursor: pointer; font-weight: 500; color: var(--text-light); transition: all 0.3s; border-radius: 12px 12px 0 0; margin: 0 5px; position: relative; }
         .tab:hover { color: var(--primary-orange); background: var(--pastel-orange); }
         .tab.active { color: var(--primary-orange); font-weight: 600; background: white; }
-        .tab.active::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
-            background: var(--primary-orange); border-radius: 3px 3px 0 0;
-        }
-
-        /* --- CONTENT ANIMATIONS --- */
+        .tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary-orange); border-radius: 3px 3px 0 0; }
         .tab-content { display: none; padding: 40px; animation: fadeIn 0.5s ease-in-out; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- UPLOAD SECTION --- */
         .upload-container { display: flex; gap: 30px; margin-bottom: 40px; justify-content: center; flex-wrap: wrap; }
-        .upload-box {
-            flex: 1; min-width: 280px; max-width: 400px; border: 2px dashed #dfe6e9; padding: 40px;
-            text-align: center; border-radius: 20px; background: var(--pastel-grey);
-            transition: all 0.3s; cursor: pointer;
-        }
-        .upload-box:hover {
-            border-color: var(--primary-orange); background: white;
-            transform: translateY(-5px); box-shadow: var(--shadow-hover);
-        }
+        .upload-box { flex: 1; min-width: 280px; max-width: 400px; border: 2px dashed #dfe6e9; padding: 40px; text-align: center; border-radius: 20px; background: var(--pastel-grey); transition: all 0.3s; cursor: pointer; }
+        .upload-box:hover { border-color: var(--primary-orange); background: white; transform: translateY(-5px); box-shadow: var(--shadow-hover); }
         .upload-icon { font-size: 40px; margin-bottom: 15px; display: block; }
-
-        /* --- BUTTONS --- */
         .actions { display: flex; gap: 20px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
-        .btn {
-            padding: 14px 35px; border: none; border-radius: 50px; cursor: pointer;
-            font-weight: 600; font-size: 14px; text-transform: uppercase;
-            transition: all 0.3s ease; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+        .btn { padding: 14px 35px; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 14px; text-transform: uppercase; transition: all 0.3s ease; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .btn-std { background: linear-gradient(135deg, #ff8c42 0%, #ff6900 100%); }
         .btn-std:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 105, 0, 0.4); }
         .btn-issue-f { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
         .btn-issue-f:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(44, 62, 80, 0.4); }
         .btn-download { background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%); display: none; margin-left: 20px; }
-
-        /* --- TABLE --- */
-        .table-responsive {
-            margin-top: 40px; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            overflow: hidden; border: 1px solid #eee; max-height: 500px; overflow-x: auto;
-        }
+        .table-responsive { margin-top: 40px; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eee; max-height: 500px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
         th { background: #2d3436; color: white; padding: 18px; text-align: left; position: sticky; top: 0; }
         td { padding: 12px 18px; border-bottom: 1px solid #f1f2f6; color: #555; }
         tr:nth-child(even) { background-color: #fafafa; }
         tr:hover { background-color: var(--pastel-orange); }
-        
         .tag-fail { background: var(--pastel-red); color: #d63031; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 11px; }
         .tag-warn { background: var(--pastel-orange); color: #e67e22; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 11px; }
         .text-action { color: #0984e3; font-weight: 600; }
-
-        /* --- CARDS & GRID --- */
         .guide-grid, .tpl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .guide-card, .tpl-card {
-            background: white; border-radius: 20px; padding: 30px;
-            transition: 0.3s; border: 1px solid #f0f0f0; position: relative;
-        }
-        .guide-card:hover, .tpl-card:hover {
-            transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--primary-orange);
-        }
-        
-        /* Icons */
+        .guide-card, .tpl-card { background: white; border-radius: 20px; padding: 30px; transition: 0.3s; border: 1px solid #f0f0f0; position: relative; }
+        .guide-card:hover, .tpl-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--primary-orange); }
         .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; }
         .icon-red { background: var(--pastel-red); color: #c0392b; }
         .icon-orange { background: var(--pastel-orange); color: #d35400; }
         .icon-dark { background: #dfe6e9; color: #2d3436; }
-
-        /* Templates */
         .tpl-card { text-align: center; cursor: pointer; }
         .tpl-icon { font-size: 30px; margin-bottom: 10px; display: block; }
         .tpl-title { font-weight: 600; color: var(--text-dark); margin-bottom: 5px; }
         .tpl-desc { font-size: 12px; color: var(--text-light); }
-
-        /* --- MODAL --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-overlay.open { display: flex; }
-        .modal-content {
-            background: white; width: 90%; max-width: 600px; border-radius: 20px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            transform: scale(0.9); transition: transform 0.2s;
-        }
+        .modal-content { background: white; width: 90%; max-width: 600px; border-radius: 20px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); transform: scale(0.9); transition: transform 0.2s; }
         .modal-overlay.open .modal-content { transform: scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
         .modal-title { font-size: 18px; font-weight: 700; color: var(--primary-orange); }
         .btn-copy { background: var(--primary-orange); color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: 0.3s; }
         .btn-copy:hover { background: var(--primary-hover); }
-        .modal-body pre {
-            background: var(--pastel-grey); padding: 20px; border-radius: 10px;
-            white-space: pre-wrap; font-family: monospace; border: 1px solid #ddd;
-            max-height: 400px; overflow-y: auto; color: #444; font-size: 12px;
-        }
+        .modal-body pre { background: var(--pastel-grey); padding: 20px; border-radius: 10px; white-space: pre-wrap; font-family: monospace; border: 1px solid #ddd; max-height: 400px; overflow-y: auto; color: #444; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -295,7 +207,6 @@
 
         // --- 2. CSV PARSING ENGINE (Robust) ---
         function parseCSV(text) {
-            // Detect separator: Count semicolons vs commas in first line
             let firstLine = text.substring(0, text.indexOf('\n'));
             let sep = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ',';
             
@@ -329,12 +240,10 @@
             const status = document.getElementById('status');
             status.innerText = "⏳ Reading & Processing...";
 
-            // Chain reading files
             const rA = new FileReader();
             rA.onload = function(eA) {
                 const rR = new FileReader();
                 rR.onload = function(eR) {
-                    // Start Engine
                     setTimeout(() => {
                         try {
                             const results = runEngine(eA.target.result, eR.target.result, mode);
@@ -344,7 +253,7 @@
                             status.innerText = "Error: " + err.message;
                             alert("An error occurred during analysis. Check console.");
                         }
-                    }, 50); // Small delay for UI update
+                    }, 50); 
                 };
                 rR.readAsText(fRep);
             };
@@ -378,7 +287,6 @@
             // C. Analyze AMD
             if(amdRows.length < 2) throw new Error("AMD file is empty");
             
-            // Find Header Row (look for specific column names)
             let hIdx = 0;
             for(let i=0; i<Math.min(amdRows.length, 10); i++) {
                 const line = amdRows[i].join("").toUpperCase();
@@ -403,15 +311,15 @@
                 else if(h.includes("TESTING INSTITUTE")) col.test = k;
             });
 
-            // Fallbacks for known structures
             if(col.textile === -1 && headers.length > 33) col.textile = 33;
             if(col.shoe === -1 && headers.length > 37) col.shoe = 37;
 
-            // Prepare Output
+            // Output Config SKU instead of Simple
             const out = [["Config SKU", "Sustainability Label", "Textile Outer", "Shoe Outer", "Component", "Cert. Level", "% Content", "Issue (Report)", "Validation Result", "Action", "Marked Sust.", "Cert Num", "Test Inst"]];
             let brand = "000";
+            
+            const seenConfigs = new Set(); // To track 13-digit SKUs
 
-            // D. Loop Rows
             for(let i = hIdx+1; i < amdRows.length; i++) {
                 const row = amdRows[i];
                 if(row.length < 5) continue;
@@ -422,7 +330,10 @@
                 let sku13 = rawSku.length >= 13 ? rawSku.substring(0,13) : rawSku;
                 let repIssue = invalidMap[sku13];
 
-                if(!repIssue) continue; // Skip if not in invalid report
+                if(!repIssue) continue; 
+                
+                if (seenConfigs.has(sku13)) continue;
+                seenConfigs.add(sku13);
 
                 // Extract values
                 let vals = {
@@ -437,19 +348,49 @@
                     test: col.test > -1 ? row[col.test] : ""
                 };
                 
-                // Logic
                 let res = "OK", act = "";
 
                 if (mode === 'STANDARD') {
-                    if (repIssue.startsWith("A")) { res="FAIL"; act="Update Certificate (Retired)"; }
-                    else if (repIssue.startsWith("B")) { res="FAIL"; act="Fill missing data"; }
-                    else if (repIssue.startsWith("E")) { res="FAIL"; act="Check % (Min 20% or 50%)"; }
-                    else if (repIssue.startsWith("F")) { res="WARN"; act="Check Issue F criteria"; }
-                    else { act="See Dashboard"; }
+                    if (repIssue.startsWith("A")) { 
+                        res="FAIL"; 
+                        act="Cert. Retired/Invalid. Upload valid cert (GOTS/GRS)."; 
+                    }
+                    else if (repIssue.startsWith("B")) { 
+                        res="FAIL"; 
+                        let missing = [];
+                        if(!vals.pct || vals.pct === "0" || vals.pct === "") missing.push("% Content");
+                        if(!vals.level) missing.push("Cert. Level");
+                        if(!vals.comp) missing.push("Component");
+                        
+                        if(missing.length > 0) act = "Missing: " + missing.join(", ");
+                        else act = "Check empty mandatory columns";
+                    }
+                    else if (repIssue.startsWith("C")) { 
+                        res="FAIL"; 
+                        if(vals.comp && vals.comp.toLowerCase().includes("full")) {
+                            act = "Invalid 'Full Product'. Select specific component.";
+                        } else {
+                            act = "Component claim not eligible.";
+                        }
+                    }
+                    else if (repIssue.startsWith("D")) { 
+                        res="FAIL"; 
+                        act = "Level '" + (vals.level || "Empty") + "' too low. Need Assembly Factory.";
+                    }
+                    else if (repIssue.startsWith("E")) { 
+                        res="FAIL"; 
+                        act = "Value " + vals.pct + "% too low (Min 20% or 50%).";
+                    }
+                    else if (repIssue.startsWith("F")) { 
+                        res="WARN"; 
+                        act="See Issue F Analysis (Deep Dive)."; 
+                    }
+                    else { 
+                        act="See Dashboard / Unknown Issue"; 
+                    }
                 } else {
                     // ISSUE F Logic (Deep Dive)
                     let mats = 0;
-                    // Scan range approx AH-AZ (33-51)
                     for(let c=33; c<=51; c++) { 
                         if(row[c] && row[c].trim().length > 2) mats++; 
                     }
@@ -468,7 +409,7 @@
                     }
                 }
 
-                out.push([rawSku, vals.label, vals.text, vals.shoe, vals.comp, vals.level, vals.pct, repIssue, res, act, vals.marked, vals.cert, vals.test]);
+                out.push([sku13, vals.label, vals.text, vals.shoe, vals.comp, vals.level, vals.pct, repIssue, res, act, vals.marked, vals.cert, vals.test]);
             }
 
             return { data: out, brandCode: brand };
@@ -480,7 +421,7 @@
             currentBrandCode = result.brandCode || "000";
             
             const status = document.getElementById('status');
-            status.innerHTML = `<span style='color:#27ae60; background:#e8f5e9; padding:6px 15px; border-radius:15px;'>✅ Analysis Complete! (${processedData.length-1} rows)</span>`;
+            status.innerHTML = `<span style='color:#27ae60; background:#e8f5e9; padding:6px 15px; border-radius:15px;'>✅ Analysis Complete! (${processedData.length-1} Config SKUs)</span>`;
             
             const btn = document.getElementById('dlBtn');
             btn.innerText = `Download Report (${currentBrandCode})`;
@@ -501,7 +442,7 @@
             thead.appendChild(trH); t.appendChild(thead);
 
             const tbody = document.createElement('tbody');
-            const max = Math.min(data.length, 100); // Preview limit
+            const max = Math.min(data.length, 100); 
             for(let i=1; i<max; i++) {
                 const tr = document.createElement('tr');
                 data[i].forEach((c, idx) => {
@@ -511,7 +452,7 @@
                     let str = String(c);
                     if(str.includes("FAIL")) td.innerHTML = `<span class="tag-fail">FAIL</span> ${str.replace("FAIL","")}`;
                     if(str.includes("WARN")) td.innerHTML = `<span class="tag-warn">WARN</span> ${str.replace("WARN","")}`;
-                    if(idx === 9 && c !== "") td.className = "text-action"; // Action column
+                    if(idx === 9 && c !== "") td.className = "text-action"; 
                     
                     tr.appendChild(td);
                 });
@@ -558,26 +499,3 @@
         function openModal(key) {
             document.getElementById('modalTitle').textContent = "Template - Issue " + key;
             document.getElementById('modalText').textContent = templates[key] || "No template found.";
-            document.getElementById('modalOverlay').classList.add('open');
-        }
-
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('open');
-        }
-
-        function copyModalText() {
-            const text = document.getElementById('modalText').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('.btn-copy');
-                const original = btn.textContent;
-                btn.textContent = "Copied!";
-                btn.style.backgroundColor = "#27ae60";
-                setTimeout(() => { 
-                    btn.textContent = original; 
-                    btn.style.backgroundColor = "#ff6900"; 
-                }, 2000);
-            });
-        }
-    </script>
-</body>
-</html>
