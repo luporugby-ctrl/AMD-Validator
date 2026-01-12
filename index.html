@@ -1,492 +1,583 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMD Sustainability Validator 2.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      /* --- VARIABILI COLORI --- */
-      :root {
-        --primary-orange: #ff6900;
-        --primary-hover: #e05500;
-        --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-        --card-white: #ffffff;
-        --text-dark: #2d3436;
-        --text-light: #636e72;
+        /* --- COLOR VARIABLES --- */
+        :root {
+            --primary-orange: #ff6900;
+            --primary-hover: #e05500;
+            --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            --card-white: #ffffff;
+            --text-dark: #2d3436;
+            --text-light: #636e72;
+            
+            /* Pastel Palette */
+            --pastel-red: #ffebee;
+            --pastel-orange: #fff3e0;
+            --pastel-grey: #f5f6fa;
+            
+            --shadow-soft: 0 10px 30px rgba(0,0,0,0.05);
+            --shadow-hover: 0 20px 40px rgba(255, 105, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            margin: 0; padding: 40px;
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-white);
+            max-width: 1200px;
+            margin: 0 auto;
+            border-radius: 24px;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            min-height: 85vh;
+            position: relative;
+        }
+
+        /* --- HEADER & TABS --- */
+        .header-title {
+            text-align: center; padding: 30px 0 10px;
+            color: var(--primary-orange); font-weight: 700; letter-spacing: -0.5px;
+        }
+
+        .tabs {
+            display: flex; justify-content: center;
+            background: white; padding: 10px 20px 0; border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tab {
+            padding: 15px 30px; cursor: pointer; font-weight: 500; color: var(--text-light);
+            transition: all 0.3s; border-radius: 12px 12px 0 0; margin: 0 5px; position: relative;
+        }
+
+        .tab:hover { color: var(--primary-orange); background: var(--pastel-orange); }
+        .tab.active { color: var(--primary-orange); font-weight: 600; background: white; }
+        .tab.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+            background: var(--primary-orange); border-radius: 3px 3px 0 0;
+        }
+
+        /* --- CONTENT ANIMATIONS --- */
+        .tab-content { display: none; padding: 40px; animation: fadeIn 0.5s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- UPLOAD SECTION --- */
+        .upload-container { display: flex; gap: 30px; margin-bottom: 40px; justify-content: center; flex-wrap: wrap; }
+        .upload-box {
+            flex: 1; min-width: 280px; max-width: 400px; border: 2px dashed #dfe6e9; padding: 40px;
+            text-align: center; border-radius: 20px; background: var(--pastel-grey);
+            transition: all 0.3s; cursor: pointer;
+        }
+        .upload-box:hover {
+            border-color: var(--primary-orange); background: white;
+            transform: translateY(-5px); box-shadow: var(--shadow-hover);
+        }
+        .upload-icon { font-size: 40px; margin-bottom: 15px; display: block; }
+
+        /* --- BUTTONS --- */
+        .actions { display: flex; gap: 20px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
+        .btn {
+            padding: 14px 35px; border: none; border-radius: 50px; cursor: pointer;
+            font-weight: 600; font-size: 14px; text-transform: uppercase;
+            transition: all 0.3s ease; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-std { background: linear-gradient(135deg, #ff8c42 0%, #ff6900 100%); }
+        .btn-std:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 105, 0, 0.4); }
+        .btn-issue-f { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
+        .btn-issue-f:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(44, 62, 80, 0.4); }
+        .btn-download { background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%); display: none; margin-left: 20px; }
+
+        /* --- TABLE --- */
+        .table-responsive {
+            margin-top: 40px; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow: hidden; border: 1px solid #eee; max-height: 500px; overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+        th { background: #2d3436; color: white; padding: 18px; text-align: left; position: sticky; top: 0; }
+        td { padding: 12px 18px; border-bottom: 1px solid #f1f2f6; color: #555; }
+        tr:nth-child(even) { background-color: #fafafa; }
+        tr:hover { background-color: var(--pastel-orange); }
         
-        /* Palette Pastello */
-        --pastel-red: #ffebee;
-        --pastel-orange: #fff3e0;
-        --pastel-green: #e8f5e9;
-        --pastel-blue: #e3f2fd;
-        --pastel-grey: #f5f6fa;
+        .tag-fail { background: var(--pastel-red); color: #d63031; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 11px; }
+        .tag-warn { background: var(--pastel-orange); color: #e67e22; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 11px; }
+        .text-action { color: #0984e3; font-weight: 600; }
+
+        /* --- CARDS & GRID --- */
+        .guide-grid, .tpl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .guide-card, .tpl-card {
+            background: white; border-radius: 20px; padding: 30px;
+            transition: 0.3s; border: 1px solid #f0f0f0; position: relative;
+        }
+        .guide-card:hover, .tpl-card:hover {
+            transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--primary-orange);
+        }
         
-        --shadow-soft: 0 10px 30px rgba(0,0,0,0.05);
-        --shadow-hover: 0 20px 40px rgba(255, 105, 0, 0.15);
-      }
+        /* Icons */
+        .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; }
+        .icon-red { background: var(--pastel-red); color: #c0392b; }
+        .icon-orange { background: var(--pastel-orange); color: #d35400; }
+        .icon-dark { background: #dfe6e9; color: #2d3436; }
 
-      body {
-        font-family: 'Poppins', sans-serif;
-        background: var(--bg-gradient);
-        margin: 0; padding: 40px;
-        color: var(--text-dark);
-        min-height: 100vh;
-      }
+        /* Templates */
+        .tpl-card { text-align: center; cursor: pointer; }
+        .tpl-icon { font-size: 30px; margin-bottom: 10px; display: block; }
+        .tpl-title { font-weight: 600; color: var(--text-dark); margin-bottom: 5px; }
+        .tpl-desc { font-size: 12px; color: var(--text-light); }
 
-      .container {
-        background: var(--card-white);
-        max-width: 1200px;
-        margin: 0 auto;
-        border-radius: 24px;
-        box-shadow: var(--shadow-soft);
-        overflow: hidden;
-        min-height: 85vh;
-        position: relative;
-      }
-
-      /* --- HEADER & TABS --- */
-      .header-title {
-        text-align: center; padding: 30px 0 10px;
-        color: var(--primary-orange); font-weight: 700; letter-spacing: -0.5px;
-      }
-
-      .tabs {
-        display: flex; justify-content: center;
-        background: white; padding: 10px 20px 0; border-bottom: 1px solid #f0f0f0;
-      }
-
-      .tab {
-        padding: 15px 30px; cursor: pointer; font-weight: 500; color: var(--text-light);
-        transition: all 0.3s; border-radius: 12px 12px 0 0; margin: 0 5px; position: relative;
-      }
-
-      .tab:hover { color: var(--primary-orange); background: var(--pastel-orange); }
-      .tab.active { color: var(--primary-orange); font-weight: 600; background: white; }
-      .tab.active::after {
-        content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
-        background: var(--primary-orange); border-radius: 3px 3px 0 0;
-      }
-
-      /* --- CONTENT ANIMATIONS --- */
-      .tab-content { display: none; padding: 40px; animation: fadeIn 0.5s ease-in-out; }
-      .tab-content.active { display: block; }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-      /* --- UPLOAD SECTION --- */
-      .upload-container { display: flex; gap: 30px; margin-bottom: 40px; justify-content: center; }
-      .upload-box {
-        flex: 1; max-width: 400px; border: 2px dashed #dfe6e9; padding: 40px;
-        text-align: center; border-radius: 20px; background: var(--pastel-grey);
-        transition: all 0.3s; cursor: pointer;
-      }
-      .upload-box:hover {
-        border-color: var(--primary-orange); background: white;
-        transform: translateY(-5px); box-shadow: var(--shadow-hover);
-      }
-      .upload-icon { font-size: 40px; margin-bottom: 15px; display: block; }
-
-      /* --- BUTTONS --- */
-      .actions { display: flex; gap: 20px; justify-content: center; margin-top: 30px; }
-      .btn {
-        padding: 14px 35px; border: none; border-radius: 50px; cursor: pointer;
-        font-weight: 600; font-size: 14px; text-transform: uppercase;
-        transition: all 0.3s ease; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      }
-      .btn-std { background: linear-gradient(135deg, #ff8c42 0%, #ff6900 100%); }
-      .btn-std:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 105, 0, 0.4); }
-      .btn-issue-f { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
-      .btn-issue-f:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(44, 62, 80, 0.4); }
-      .btn-download { background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%); display: none; margin-left: 20px; }
-
-      /* --- TABLE --- */
-      .table-responsive {
-        margin-top: 40px; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        overflow: hidden; border: 1px solid #eee; max-height: 500px; overflow-x: auto;
-      }
-      table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
-      th { background: #2d3436; color: white; padding: 18px; text-align: left; position: sticky; top: 0; }
-      td { padding: 12px 18px; border-bottom: 1px solid #f1f2f6; color: #555; }
-      tr:nth-child(even) { background-color: #fafafa; }
-      tr:hover { background-color: var(--pastel-orange); }
-      .tag-fail { background: var(--pastel-red); color: #d63031; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 11px; }
-      .tag-warn { background: var(--pastel-orange); color: #e67e22; padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 11px; }
-      .text-action { color: #0984e3; font-weight: 600; }
-
-      /* --- GUIDES --- */
-      .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
-      .guide-card {
-        background: white; border-radius: 20px; padding: 30px;
-        transition: all 0.3s; border: 1px solid #f0f0f0; position: relative;
-      }
-      .guide-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: var(--primary-orange); }
-      .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin-bottom: 15px; }
-      .icon-red { background: var(--pastel-red); color: #c0392b; }
-      .icon-orange { background: var(--pastel-orange); color: #d35400; }
-      .icon-dark { background: #dfe6e9; color: #2d3436; }
-
-      /* --- TEMPLATES GRID (Clickable Cards) --- */
-      .tpl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
-      .tpl-card {
-        background: white; padding: 30px; border-radius: 16px; border: 1px solid #eee;
-        text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-      .tpl-card:hover {
-        border-color: var(--primary-orange); box-shadow: var(--shadow-hover);
-        transform: scale(1.05); background: var(--pastel-orange);
-      }
-      .tpl-icon { font-size: 30px; margin-bottom: 10px; display: block; }
-      .tpl-title { font-weight: 600; color: var(--text-dark); margin-bottom: 5px; }
-      .tpl-desc { font-size: 12px; color: var(--text-light); }
-
-      /* --- MODAL (POP-UP) STYLES --- */
-      .modal-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
-        z-index: 1000; display: none; align-items: center; justify-content: center;
-        opacity: 0; transition: opacity 0.3s ease;
-      }
-      .modal-overlay.open { display: flex; opacity: 1; }
-
-      .modal-content {
-        background: white; width: 90%; max-width: 600px; border-radius: 20px;
-        padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-        transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        position: relative;
-      }
-      .modal-overlay.open .modal-content { transform: scale(1); }
-
-      .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-      .modal-title { font-size: 18px; font-weight: 700; color: var(--primary-orange); }
-      .close-modal { font-size: 24px; color: #999; cursor: pointer; transition: 0.2s; }
-      .close-modal:hover { color: #333; }
-
-      .modal-body pre {
-        background: var(--pastel-grey); padding: 20px; border-radius: 10px;
-        font-family: 'Courier New', monospace; font-size: 13px; color: #444;
-        white-space: pre-wrap; line-height: 1.5; border: 1px solid #ddd;
-        max-height: 400px; overflow-y: auto;
-      }
-      
-      .modal-actions { text-align: right; margin-top: 20px; }
-      .btn-copy {
-        background: var(--primary-orange); color: white; border: none;
-        padding: 10px 25px; border-radius: 30px; cursor: pointer;
-        font-weight: 600; font-size: 13px; transition: 0.3s;
-      }
-      .btn-copy:hover { background: var(--primary-hover); transform: translateY(-2px); }
-
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-content {
+            background: white; width: 90%; max-width: 600px; border-radius: 20px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            transform: scale(0.9); transition: transform 0.2s;
+        }
+        .modal-overlay.open .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .modal-title { font-size: 18px; font-weight: 700; color: var(--primary-orange); }
+        .btn-copy { background: var(--primary-orange); color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-copy:hover { background: var(--primary-hover); }
+        .modal-body pre {
+            background: var(--pastel-grey); padding: 20px; border-radius: 10px;
+            white-space: pre-wrap; font-family: monospace; border: 1px solid #ddd;
+            max-height: 400px; overflow-y: auto; color: #444; font-size: 12px;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
 
     <div class="container">
-      <h1 class="header-title">AMD Sustainability Validator 2.0</h1>
+        <h1 class="header-title">AMD Sustainability Validator 2.0</h1>
 
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('validator')">1. VALIDATOR</div>
-        <div class="tab" onclick="switchTab('guide')">2. RESOLUTION GUIDE</div>
-        <div class="tab" onclick="switchTab('templates')">3. EMAIL TEMPLATES</div>
-      </div>
-
-      <div id="validator" class="tab-content active">
-        <div style="text-align:center; margin-bottom:30px;">
-          <h2 style="color:var(--text-dark); font-weight:600;">Data Analysis Tool</h2>
-          <p style="color:var(--text-light);">Drag & drop or click to upload your files below.</p>
-        </div>
-        
-        <div class="upload-container">
-          <div class="upload-box" onclick="document.getElementById('fileAmd').click()">
-            <span class="upload-icon">📄</span>
-            <label><strong>1. Upload AMD File</strong></label><br>
-            <span style="font-size:12px; color:#999;">(.csv from Tradebyte/System)</span>
-            <input type="file" id="fileAmd" accept=".csv" style="display:none" onchange="fileCheck('fileAmd', this)">
-            <div id="name-fileAmd" style="margin-top:10px; font-weight:600; color:var(--primary-orange);"></div>
-          </div>
-
-          <div class="upload-box" onclick="document.getElementById('fileReport').click()">
-            <span class="upload-icon">⚠️</span>
-            <label><strong>2. Upload Invalid Report</strong></label><br>
-            <span style="font-size:12px; color:#999;">(.csv from Dashboard)</span>
-            <input type="file" id="fileReport" accept=".csv" style="display:none" onchange="fileCheck('fileReport', this)">
-            <div id="name-fileReport" style="margin-top:10px; font-weight:600; color:var(--primary-orange);"></div>
-          </div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('validator')">1. VALIDATOR</div>
+            <div class="tab" onclick="switchTab('guide')">2. RESOLUTION GUIDE</div>
+            <div class="tab" onclick="switchTab('templates')">3. EMAIL TEMPLATES</div>
         </div>
 
-        <div class="actions">
-          <button class="btn btn-std" onclick="runAnalysis('STANDARD')">Standard Analysis (A-E)</button>
-          <button class="btn btn-issue-f" onclick="runAnalysis('ISSUE_F')">Issue F (Deep Dive)</button>
-        </div>
-        
-        <div style="text-align:center; margin-top:25px;">
-           <div id="status" style="font-weight:500; color: var(--text-light); min-height: 24px;"></div>
-           <button id="dlBtn" class="btn btn-download" onclick="downloadCsv()">Download Final Report</button>
+        <div id="validator" class="tab-content active">
+            <div style="text-align:center; margin-bottom:30px;">
+                <h2 style="color:var(--text-dark); font-weight:600;">Data Analysis Tool</h2>
+                <p style="color:var(--text-light);">Local Processing: Your data never leaves the browser.</p>
+            </div>
+            
+            <div class="upload-container">
+                <div class="upload-box" onclick="document.getElementById('fileAmd').click()">
+                    <span class="upload-icon">📄</span>
+                    <label><strong>1. Upload AMD File</strong></label><br>
+                    <span style="font-size:12px; color:#999;">(.csv from Tradebyte/System)</span>
+                    <input type="file" id="fileAmd" accept=".csv" style="display:none" onchange="fileCheck('fileAmd', this)">
+                    <div id="name-fileAmd" style="margin-top:10px; font-weight:600; color:var(--primary-orange);"></div>
+                </div>
+
+                <div class="upload-box" onclick="document.getElementById('fileReport').click()">
+                    <span class="upload-icon">⚠️</span>
+                    <label><strong>2. Upload Invalid Report</strong></label><br>
+                    <span style="font-size:12px; color:#999;">(.csv from Dashboard)</span>
+                    <input type="file" id="fileReport" accept=".csv" style="display:none" onchange="fileCheck('fileReport', this)">
+                    <div id="name-fileReport" style="margin-top:10px; font-weight:600; color:var(--primary-orange);"></div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-std" onclick="startAnalysis('STANDARD')">Standard Analysis (A-E)</button>
+                <button class="btn btn-issue-f" onclick="startAnalysis('ISSUE_F')">Issue F (Deep Dive)</button>
+            </div>
+            
+            <div style="text-align:center; margin-top:25px;">
+               <div id="status" style="font-weight:500; color: var(--text-light); min-height: 24px;"></div>
+               <button id="dlBtn" class="btn btn-download" onclick="downloadCsv()">Download Report</button>
+            </div>
+
+            <div id="tableContainer" class="table-responsive" style="display:none;">
+                <table id="resultTable"></table>
+            </div>
         </div>
 
-        <div id="tableContainer" class="table-responsive" style="display:none;">
-          <table id="resultTable"></table>
-        </div>
-      </div>
-
-      <div id="guide" class="tab-content">
-        <div style="text-align:center; margin-bottom:40px;">
-          <h2>Error Resolution Guide</h2>
-          <p style="color:var(--text-light);">Hover over the cards to see details.</p>
-        </div>
-        
-        <div class="guide-grid">
-          <div class="guide-card">
-            <div class="card-icon icon-red">A</div>
-            <h3>Certificate Retired</h3>
-            <p>The certificate used is no longer valid or has expired (e.g. old BCI). <strong>Action:</strong> Request a valid certificate (GOTS, OCS, GRS).</p>
-          </div>
-          <div class="guide-card">
-            <div class="card-icon icon-orange">B</div>
-            <h3>Missing Data Points</h3>
-            <p>Mandatory data is missing. <strong>Action:</strong> Check empty columns: Percentage (%), Certification Level, and Component.</p>
-          </div>
-          <div class="guide-card">
-            <div class="card-icon icon-orange">C</div>
-            <h3>Component Not Eligible</h3>
-            <p>"Full Product" claim on mixed items. <strong>Action:</strong> Change to "Component Claim" (e.g. Upper Material).</p>
-          </div>
-          <div class="guide-card">
-            <div class="card-icon icon-orange">D</div>
-            <h3>Tier Not Met</h3>
-            <p>Level too low (e.g. Material Fabrication). <strong>Action:</strong> Need at least "Assembly Factory" or "Brand" level.</p>
-          </div>
-          <div class="guide-card">
-            <div class="card-icon icon-orange">E</div>
-            <h3>Low Percentage</h3>
-            <p>Percentage below minimum. <strong>Action:</strong> Must be >50% (Organic) or >20% (Recycled).</p>
-          </div>
-          <div class="guide-card">
-            <div class="card-icon icon-dark">F</div>
-            <h3>Deep Dive / Mismatch</h3>
-            <p>Complex mismatch between material columns. <strong>Action:</strong> Use the "Issue F" button in the validator.</p>
-          </div>
-        </div>
-      </div>
-
-      <div id="templates" class="tab-content">
-         <div style="text-align:center; margin-bottom:40px;">
-          <h2>Supplier Communication</h2>
-          <p style="color:var(--text-light);">Click on a card to view and copy the email template.</p>
+        <div id="guide" class="tab-content">
+            <div style="text-align:center; margin-bottom:40px;">
+                <h2>Error Resolution Guide</h2>
+                <p style="color:var(--text-light);">Hover over the cards to see details.</p>
+            </div>
+            
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <div class="card-icon icon-red">A</div>
+                    <h3>Certificate Retired</h3>
+                    <p>Certificate invalid/expired (e.g. old BCI). <strong>Action:</strong> Request GOTS/OCS/GRS.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="card-icon icon-orange">B</div>
+                    <h3>Missing Data Points</h3>
+                    <p>Mandatory data missing. <strong>Action:</strong> Fill %, Level, Component.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="card-icon icon-orange">C</div>
+                    <h3>Component Not Eligible</h3>
+                    <p>"Full Product" claim on mixed items. <strong>Action:</strong> Change to "Component Claim".</p>
+                </div>
+                <div class="guide-card">
+                    <div class="card-icon icon-orange">D</div>
+                    <h3>Tier Not Met</h3>
+                    <p>Level too low. <strong>Action:</strong> Need Assembly Factory or Brand level.</p>
+                </div>
+                <div class="guide-card">
+                    <div class="card-icon icon-orange">E</div>
+                    <h3>Low Percentage</h3>
+                    <p>Percentage below minimum. <strong>Action:</strong> >50% (Organic) or >20% (Recycled).</p>
+                </div>
+                <div class="guide-card">
+                    <div class="card-icon icon-dark">F</div>
+                    <h3>Deep Dive / Mismatch</h3>
+                    <p>Complex mismatch (Materials vs Cert). <strong>Action:</strong> Use Issue F Analysis button.</p>
+                </div>
+            </div>
         </div>
 
-        <div class="tpl-grid">
-          <div class="tpl-card" onclick="openModal('A')">
-            <span class="tpl-icon">📩</span>
-            <div class="tpl-title">Issue A</div>
-            <div class="tpl-desc">Certificate Invalid</div>
-          </div>
-          <div class="tpl-card" onclick="openModal('B')">
-             <span class="tpl-icon">📩</span>
-            <div class="tpl-title">Issue B</div>
-            <div class="tpl-desc">Missing Data</div>
-          </div>
-          <div class="tpl-card" onclick="openModal('C')">
-             <span class="tpl-icon">📩</span>
-            <div class="tpl-title">Issue C</div>
-            <div class="tpl-desc">Component Mismatch</div>
-          </div>
-          <div class="tpl-card" onclick="openModal('D')">
-             <span class="tpl-icon">📩</span>
-            <div class="tpl-title">Issue D</div>
-            <div class="tpl-desc">Tier Not Met</div>
-          </div>
-          <div class="tpl-card" onclick="openModal('E')">
-             <span class="tpl-icon">📩</span>
-            <div class="tpl-title">Issue E</div>
-            <div class="tpl-desc">Low Percentage</div>
-          </div>
-          <div class="tpl-card" onclick="openModal('F')">
-             <span class="tpl-icon">🕵️</span>
-            <div class="tpl-title">Issue F</div>
-            <div class="tpl-desc">Deep Dive</div>
-          </div>
+        <div id="templates" class="tab-content">
+            <div style="text-align:center; margin-bottom:40px;">
+                <h2>Supplier Communication</h2>
+                <p style="color:var(--text-light);">Click on a card to view and copy the template.</p>
+            </div>
+
+            <div class="tpl-grid">
+                <div class="tpl-card" onclick="openModal('A')"><span class="tpl-icon">📩</span><div class="tpl-title">Issue A</div><div class="tpl-desc">Invalid Certificate</div></div>
+                <div class="tpl-card" onclick="openModal('B')"><span class="tpl-icon">📩</span><div class="tpl-title">Issue B</div><div class="tpl-desc">Missing Data</div></div>
+                <div class="tpl-card" onclick="openModal('C')"><span class="tpl-icon">📩</span><div class="tpl-title">Issue C</div><div class="tpl-desc">Component Mismatch</div></div>
+                <div class="tpl-card" onclick="openModal('D')"><span class="tpl-icon">📩</span><div class="tpl-title">Issue D</div><div class="tpl-desc">Tier Not Met</div></div>
+                <div class="tpl-card" onclick="openModal('E')"><span class="tpl-icon">📩</span><div class="tpl-title">Issue E</div><div class="tpl-desc">Low Percentage</div></div>
+                <div class="tpl-card" onclick="openModal('F')"><span class="tpl-icon">🕵️</span><div class="tpl-title">Issue F</div><div class="tpl-desc">Deep Dive</div></div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-      <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header">
-          <div class="modal-title" id="modalTitle">Template Title</div>
-          <div class="close-modal" onclick="closeModal(null)">&times;</div>
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Template</div>
+                <div style="cursor:pointer; font-size:24px; color:#999;" onclick="closeModal()">&times;</div>
+            </div>
+            <div class="modal-body">
+                <pre id="modalText"></pre>
+            </div>
+            <div style="text-align:right; margin-top:20px;">
+                <button class="btn-copy" onclick="copyModalText()">Copy to Clipboard</button>
+            </div>
         </div>
-        <div class="modal-body">
-          <pre id="modalText"></pre>
-        </div>
-        <div class="modal-actions">
-          <button class="btn-copy" onclick="copyModalText()">Copy to Clipboard</button>
-        </div>
-      </div>
     </div>
 
     <script>
-      // --- DATA TEMPLATES (Updated with User's Text) ---
-      const templatesData = {
-        'A': {
-          title: "Issue A - Certificate Invalid",
-          body: `Subject: Action Required - Invalid/Retired Certificate (Issue A) \n\nDear Supplier,\nWe noticed that for the attached SKUs, the certificate provided is no longer valid or has been retired (e.g., BCI, old standards).\n\nAction Required:\nPlease update the AMD with a valid certificate (e.g., GOTS, OCS, GRS).\n\nBest regards,\nSustainability Team`
-        },
-        'B': {
-          title: "Issue B - Missing Data",
-          body: `Subject: Action Required - Missing Mandatory Data (Issue B) \n\nDear Supplier,\nThe attached articles are missing mandatory sustainability data points.\n\nAction Required:\nPlease fill in: Certified Percentage (%), Certification Level, and Component.\n\nBest regards,\nSustainability Team`
-        },
-        'C': {
-          title: "Issue C - Component Mismatch",
-          body: `Subject: Correction Needed - Component Eligibility (Issue C) \n\nDear Supplier,\nWe detected an eligibility issue regarding the "Component/Full Product" field.\n\nAction Required:\nPlease change the claim from "Full Product" to the specific "Component" (e.g., Upper Material).\n\nBest regards,\nSustainability Team`
-        },
-        'D': {
-          title: "Issue D - Tier Not Met",
-          body: `Subject: Action Required - Certification Level (Issue D) \n\nDear Supplier,\nThe Certification Level provided is too low (e.g. Material Fabrication).\n\nAction Required:\nPlease upgrade to "Assembly Factory" or "Brand/Product Level".\n\nBest regards,\nSustainability Team`
-        },
-        'E': {
-          title: "Issue E - Low Percentage",
-          body: `Subject: Action Required - Percentage Threshold (Issue E)\n\nDear Supplier,\nThe percentage of sustainable material is below the threshold.\n\nRequirements:\n- Organic Standards: Minimum 50%.\n- Recycled Standards: Minimum 20%.\n\nBest regards,\nSustainability Team`
-        },
-        'F': {
-          title: "Issue F - Deep Dive",
-          body: `Subject: Investigation Needed - Data Inconsistency (Issue F) \n\nDear Supplier,\nThese articles have been flagged for "Other Issues".\n\nPlease check:\n1. Is "Full Product" claimed on a multi-material item?\n2. Are the material columns (Textile vs Shoe Outer) filled correctly?\n\nBest regards,\nSustainability Team`
-        }
-      };
+        // --- 1. CONFIGURATION & STATE ---
+        var processedData = [];
+        var currentBrandCode = "000";
 
-      // --- MODAL FUNCTIONS ---
-      function openModal(key) {
-        const tpl = templatesData[key];
-        document.getElementById('modalTitle').innerText = tpl.title;
-        document.getElementById('modalText').innerText = tpl.body;
-        
-        const overlay = document.getElementById('modalOverlay');
-        overlay.style.display = 'flex';
-        // Timeout per attivare l'animazione CSS
-        setTimeout(() => { overlay.classList.add('open'); }, 10);
-      }
-
-      function closeModal(e) {
-        const overlay = document.getElementById('modalOverlay');
-        overlay.classList.remove('open');
-        setTimeout(() => { overlay.style.display = 'none'; }, 300); // Wait for transition
-      }
-
-      function copyModalText() {
-        const text = document.getElementById('modalText').innerText;
-        navigator.clipboard.writeText(text).then(() => {
-          const btn = document.querySelector('.btn-copy');
-          const original = btn.innerText;
-          btn.innerText = "Copied!";
-          btn.style.backgroundColor = "#27ae60";
-          setTimeout(() => { 
-            btn.innerText = original; 
-            btn.style.backgroundColor = "#ff6900"; 
-          }, 2000);
-        });
-      }
-
-      // --- TAB SWITCHING & OTHER LOGIC (UNCHANGED) ---
-      var processedData = [];
-      var currentBrandCode = "000";
-
-      function switchTab(tabId) {
-        var contents = document.querySelectorAll('.tab-content');
-        contents.forEach(function(el) { el.classList.remove('active'); });
-        var tabs = document.querySelectorAll('.tab');
-        tabs.forEach(function(el) { el.classList.remove('active'); });
-
-        document.getElementById(tabId).classList.add('active');
-        var activeBtn = document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`);
-        if(activeBtn) activeBtn.classList.add('active');
-      }
-
-      function fileCheck(id, input) {
-        if(input.files.length > 0) {
-           document.getElementById('name-'+id).innerText = input.files[0].name;
-           input.parentElement.style.borderColor = "#ff6900";
-           input.parentElement.style.backgroundColor = "#fff3e0";
-        }
-      }
-
-      function runAnalysis(mode) {
-        var fAmd = document.getElementById('fileAmd').files[0];
-        var fRep = document.getElementById('fileReport').files[0];
-        
-        if(!fAmd || !fRep) { 
-            alert("⚠️ Please upload BOTH files (AMD and Report) to proceed."); 
-            return; 
-        }
-
-        var status = document.getElementById('status');
-        status.innerHTML = "⏳ Processing (Mode: <strong>" + mode + "</strong>)... please wait.";
-        
-        document.getElementById('dlBtn').style.display = "none";
-        document.getElementById('tableContainer').style.display = "none";
-
-        var rA = new FileReader();
-        rA.onload = function(eA) {
-          var rR = new FileReader();
-          rR.onload = function(eR) {
-             google.script.run
-               .withSuccessHandler(onSuccess)
-               .withFailureHandler(function(e){ 
-                  status.innerText = "ERROR: " + e.message; 
-                  status.style.color = "red";
-                  alert("Script Error: " + e.message); 
-               })
-               .processData(eA.target.result, eR.target.result, mode);
-          };
-          rR.readAsText(fRep);
+        // Template Data
+        const templates = {
+            'A': `Subject: Action Required - Invalid/Retired Certificate (Issue A) \n\nDear Supplier,\nWe noticed that for the attached SKUs, the certificate provided is no longer valid or has been retired (e.g., BCI, old standards).\n\nAction Required:\nPlease update the AMD with a valid certificate (e.g., GOTS, OCS, GRS).\n\nBest regards,\nSustainability Team`,
+            'B': `Subject: Action Required - Missing Mandatory Data (Issue B) \n\nDear Supplier,\nThe attached articles are missing mandatory sustainability data points.\n\nAction Required:\nPlease fill in: Certified Percentage (%), Certification Level, and Component.\n\nBest regards,\nSustainability Team`,
+            'C': `Subject: Correction Needed - Component Eligibility (Issue C) \n\nDear Supplier,\nWe detected an eligibility issue regarding the "Component/Full Product" field.\n\nAction Required:\nPlease change the claim from "Full Product" to the specific "Component" (e.g., Upper Material).\n\nBest regards,\nSustainability Team`,
+            'D': `Subject: Action Required - Certification Level (Issue D) \n\nDear Supplier,\nThe Certification Level provided is too low (e.g. Material Fabrication).\n\nAction Required:\nPlease upgrade to "Assembly Factory" or "Brand/Product Level".\n\nBest regards,\nSustainability Team`,
+            'E': `Subject: Action Required - Percentage Threshold (Issue E)\n\nDear Supplier,\nThe percentage of sustainable material is below the threshold.\n\nRequirements:\n- Organic Standards: Minimum 50%.\n- Recycled Standards: Minimum 20%.\n\nBest regards,\nSustainability Team`,
+            'F': `Subject: Investigation Needed - Data Inconsistency (Issue F) \n\nDear Supplier,\nThese articles have been flagged for "Other Issues".\n\nPlease check:\n1. Is "Full Product" claimed on a multi-material item?\n2. Are the material columns (Textile vs Shoe Outer) filled correctly?\n\nBest regards,\nSustainability Team`
         };
-        rA.readAsText(fAmd);
-      }
 
-      function onSuccess(res) {
-        processedData = res.data;
-        currentBrandCode = res.brandCode || "000";
-        var status = document.getElementById('status');
-        status.innerHTML = "<span style='color:#27ae60; background:#e8f5e9; padding:5px 15px; border-radius:15px;'>✅ Analysis Complete! (" + (processedData.length - 1) + " rows)</span>";
-        var btn = document.getElementById('dlBtn');
-        btn.innerHTML = "Download Report (" + currentBrandCode + ")";
-        btn.style.display = "inline-block";
-        renderTable(processedData);
-      }
-
-      function renderTable(data) {
-        var table = document.getElementById('resultTable');
-        table.innerHTML = "";
-        var thead = document.createElement('thead');
-        var tr = document.createElement('tr');
-        data[0].forEach(h => { var th=document.createElement('th'); th.innerText=h; tr.appendChild(th); });
-        thead.appendChild(tr); table.appendChild(thead);
-
-        var tbody = document.createElement('tbody');
-        for(var i=1; i<Math.min(data.length, 100); i++) {
-           var r = document.createElement('tr');
-           data[i].forEach((c, idx) => {
-              var td = document.createElement('td'); 
-              td.innerText = c;
-              if(String(c).indexOf("FAIL") > -1) td.innerHTML = "<span class='tag-fail'>FAIL</span> " + c.replace("FAIL", "");
-              if(String(c).indexOf("WARN") > -1) td.innerHTML = "<span class='tag-warn'>WARN</span> " + c.replace("WARN", "");
-              if(idx === 9 && c !== "") td.className = "text-action"; 
-              r.appendChild(td);
-           });
-           tbody.appendChild(r);
+        // --- 2. CSV PARSING ENGINE (Robust) ---
+        function parseCSV(text) {
+            // Detect separator: Count semicolons vs commas in first line
+            let firstLine = text.substring(0, text.indexOf('\n'));
+            let sep = (firstLine.split(';').length > firstLine.split(',').length) ? ';' : ',';
+            
+            let arr = [];
+            let quote = false;  
+            let col = 0, row = 0;
+            
+            for (let c = 0; c < text.length; c++) {
+                let cc = text[c], nc = text[c+1];
+                arr[row] = arr[row] || [];
+                arr[row][col] = arr[row][col] || '';
+                
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+                if (cc == '"') { quote = !quote; continue; }
+                if (cc == sep && !quote) { ++col; continue; }
+                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+                if (cc == '\r' && !quote) { continue; }
+                
+                arr[row][col] += cc;
+            }
+            return arr;
         }
-        table.appendChild(tbody);
-        document.getElementById('tableContainer').style.display = "block";
-      }
 
-      function downloadCsv() {
-        if(!processedData.length) return;
-        let csv = "";
-        processedData.forEach(row => {
-          csv += row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(";") + "\r\n";
-        });
-        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        var link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "Validator_Report_" + currentBrandCode + ".csv";
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-      }
+        // --- 3. ANALYSIS LOGIC (The Brain) ---
+        function startAnalysis(mode) {
+            const fAmd = document.getElementById('fileAmd').files[0];
+            const fRep = document.getElementById('fileReport').files[0];
+
+            if (!fAmd || !fRep) { alert("⚠️ Please upload BOTH files."); return; }
+
+            const status = document.getElementById('status');
+            status.innerText = "⏳ Reading & Processing...";
+
+            // Chain reading files
+            const rA = new FileReader();
+            rA.onload = function(eA) {
+                const rR = new FileReader();
+                rR.onload = function(eR) {
+                    // Start Engine
+                    setTimeout(() => {
+                        try {
+                            const results = runEngine(eA.target.result, eR.target.result, mode);
+                            onSuccess(results);
+                        } catch (err) {
+                            console.error(err);
+                            status.innerText = "Error: " + err.message;
+                            alert("An error occurred during analysis. Check console.");
+                        }
+                    }, 50); // Small delay for UI update
+                };
+                rR.readAsText(fRep);
+            };
+            rA.readAsText(fAmd);
+        }
+
+        function runEngine(amdText, repText, mode) {
+            // A. Parse Files
+            const repRows = parseCSV(repText);
+            const amdRows = parseCSV(amdText);
+
+            // B. Build Map from Invalid Report
+            const invalidMap = {};
+            if(repRows.length > 1) {
+                const repHeaders = repRows[0].map(h => h.trim().toUpperCase());
+                const idxSku = repHeaders.findIndex(h => h.includes("CONFIG SKU") && !h.includes("MAIN"));
+                const idxIssue = repHeaders.findIndex(h => h.includes("PRIMARY ISSUE"));
+
+                if(idxSku > -1) {
+                    for(let r=1; r<repRows.length; r++) {
+                        const row = repRows[r];
+                        if(row.length <= idxSku) continue;
+                        let sku = row[idxSku].trim().toUpperCase();
+                        if(sku.length > 13) sku = sku.substring(0,13);
+                        const issue = (idxIssue > -1) ? row[idxIssue] : "Generic Issue";
+                        if(sku) invalidMap[sku] = issue;
+                    }
+                }
+            }
+
+            // C. Analyze AMD
+            if(amdRows.length < 2) throw new Error("AMD file is empty");
+            
+            // Find Header Row (look for specific column names)
+            let hIdx = 0;
+            for(let i=0; i<Math.min(amdRows.length, 10); i++) {
+                const line = amdRows[i].join("").toUpperCase();
+                if(line.includes("TEXTILE OUTER") || line.includes("SUSTAINABILITY LABEL")) {
+                    hIdx = i; break;
+                }
+            }
+            const headers = amdRows[hIdx].map(h => h.trim().toUpperCase());
+
+            // Map Columns
+            const col = { sku:-1, label:-1, textile:-1, shoe:-1, comp:-1, level:-1, pct:-1, marked:-1, cert:-1, test:-1 };
+            headers.forEach((h, k) => {
+                if(h.includes("CONFIG SKU") || h.includes("SIMPLE-SKU")) col.sku = k;
+                else if(h.includes("SUSTAINABILITY LABEL")) col.label = k;
+                else if(h.includes("TEXTILE OUTER")) col.textile = k;
+                else if(h.includes("SHOE OUTER")) col.shoe = k;
+                else if(h.includes("COMPONENT")) col.comp = k;
+                else if(h.includes("CERTIFICATION LEVEL")) col.level = k;
+                else if(h.includes("PERCENTAGE")) col.pct = k;
+                else if(h.includes("MARKED AS SUSTAINABLE")) col.marked = k;
+                else if(h.includes("CERTIFICATION") && h.includes("NUMBER")) col.cert = k;
+                else if(h.includes("TESTING INSTITUTE")) col.test = k;
+            });
+
+            // Fallbacks for known structures
+            if(col.textile === -1 && headers.length > 33) col.textile = 33;
+            if(col.shoe === -1 && headers.length > 37) col.shoe = 37;
+
+            // Prepare Output
+            const out = [["Config SKU", "Sustainability Label", "Textile Outer", "Shoe Outer", "Component", "Cert. Level", "% Content", "Issue (Report)", "Validation Result", "Action", "Marked Sust.", "Cert Num", "Test Inst"]];
+            let brand = "000";
+
+            // D. Loop Rows
+            for(let i = hIdx+1; i < amdRows.length; i++) {
+                const row = amdRows[i];
+                if(row.length < 5) continue;
+
+                let rawSku = (col.sku > -1 && row[col.sku]) ? row[col.sku].trim().toUpperCase() : "";
+                if(brand === "000" && rawSku.length >= 3) brand = rawSku.substring(0,3);
+                
+                let sku13 = rawSku.length >= 13 ? rawSku.substring(0,13) : rawSku;
+                let repIssue = invalidMap[sku13];
+
+                if(!repIssue) continue; // Skip if not in invalid report
+
+                // Extract values
+                let vals = {
+                    label: col.label > -1 ? row[col.label] : "",
+                    text: col.textile > -1 ? row[col.textile] : "",
+                    shoe: col.shoe > -1 ? row[col.shoe] : "",
+                    comp: col.comp > -1 ? row[col.comp] : "",
+                    level: col.level > -1 ? row[col.level] : "",
+                    pct: col.pct > -1 ? row[col.pct] : "0",
+                    marked: col.marked > -1 ? row[col.marked] : "",
+                    cert: col.cert > -1 ? row[col.cert] : "",
+                    test: col.test > -1 ? row[col.test] : ""
+                };
+                
+                // Logic
+                let res = "OK", act = "";
+
+                if (mode === 'STANDARD') {
+                    if (repIssue.startsWith("A")) { res="FAIL"; act="Update Certificate (Retired)"; }
+                    else if (repIssue.startsWith("B")) { res="FAIL"; act="Fill missing data"; }
+                    else if (repIssue.startsWith("E")) { res="FAIL"; act="Check % (Min 20% or 50%)"; }
+                    else if (repIssue.startsWith("F")) { res="WARN"; act="Check Issue F criteria"; }
+                    else { act="See Dashboard"; }
+                } else {
+                    // ISSUE F Logic (Deep Dive)
+                    let mats = 0;
+                    // Scan range approx AH-AZ (33-51)
+                    for(let c=33; c<=51; c++) { 
+                        if(row[c] && row[c].trim().length > 2) mats++; 
+                    }
+
+                    if (vals.comp && vals.comp.toUpperCase().includes("FULL") && vals.label && vals.label.toUpperCase().includes("LWG")) {
+                         if (vals.text && vals.text.length > 2) { res="FAIL (F)"; act="Full Product Mismatch (Textile present)"; }
+                    }
+                    else if (mats > 1 && vals.comp && vals.comp.toUpperCase().includes("COMPONENT")) {
+                        res="WARN (F)"; act="Check Variants (Multiple cols filled)";
+                    }
+                    else if (vals.pct === "0" || vals.pct === "") {
+                        res="FAIL"; act="Percentage is 0";
+                    }
+                    else {
+                        res="OK (Deep Dive)"; act="No structural error found";
+                    }
+                }
+
+                out.push([rawSku, vals.label, vals.text, vals.shoe, vals.comp, vals.level, vals.pct, repIssue, res, act, vals.marked, vals.cert, vals.test]);
+            }
+
+            return { data: out, brandCode: brand };
+        }
+
+        // --- 4. UI FUNCTIONS ---
+        function onSuccess(result) {
+            processedData = result.data;
+            currentBrandCode = result.brandCode || "000";
+            
+            const status = document.getElementById('status');
+            status.innerHTML = `<span style='color:#27ae60; background:#e8f5e9; padding:6px 15px; border-radius:15px;'>✅ Analysis Complete! (${processedData.length-1} rows)</span>`;
+            
+            const btn = document.getElementById('dlBtn');
+            btn.innerText = `Download Report (${currentBrandCode})`;
+            btn.style.display = "inline-block";
+            
+            renderTable(processedData);
+        }
+
+        function renderTable(data) {
+            const t = document.getElementById('resultTable'); 
+            t.innerHTML = "";
+            
+            const thead = document.createElement('thead');
+            const trH = document.createElement('tr');
+            data[0].forEach(h => {
+                const th = document.createElement('th'); th.textContent = h; trH.appendChild(th);
+            });
+            thead.appendChild(trH); t.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            const max = Math.min(data.length, 100); // Preview limit
+            for(let i=1; i<max; i++) {
+                const tr = document.createElement('tr');
+                data[i].forEach((c, idx) => {
+                    const td = document.createElement('td'); 
+                    td.textContent = c;
+                    
+                    let str = String(c);
+                    if(str.includes("FAIL")) td.innerHTML = `<span class="tag-fail">FAIL</span> ${str.replace("FAIL","")}`;
+                    if(str.includes("WARN")) td.innerHTML = `<span class="tag-warn">WARN</span> ${str.replace("WARN","")}`;
+                    if(idx === 9 && c !== "") td.className = "text-action"; // Action column
+                    
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            }
+            t.appendChild(tbody);
+            document.getElementById('tableContainer').style.display = "block";
+        }
+
+        function downloadCsv() {
+            if(!processedData.length) return;
+            
+            let csv = processedData.map(row => 
+                row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(";")
+            ).join("\r\n");
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Validator_Report_${currentBrandCode}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            const activeBtn = document.querySelector(`.tab[onclick="switchTab('${id}')"]`);
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+
+        function fileCheck(id, input) {
+            if(input.files.length) {
+                document.getElementById('name-'+id).textContent = input.files[0].name;
+                input.parentElement.style.borderColor = "#ff6900";
+                input.parentElement.style.backgroundColor = "#fff3e0";
+            }
+        }
+
+        function openModal(key) {
+            document.getElementById('modalTitle').textContent = "Template - Issue " + key;
+            document.getElementById('modalText').textContent = templates[key] || "No template found.";
+            document.getElementById('modalOverlay').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+        }
+
+        function copyModalText() {
+            const text = document.getElementById('modalText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.btn-copy');
+                const original = btn.textContent;
+                btn.textContent = "Copied!";
+                btn.style.backgroundColor = "#27ae60";
+                setTimeout(() => { 
+                    btn.textContent = original; 
+                    btn.style.backgroundColor = "#ff6900"; 
+                }, 2000);
+            });
+        }
     </script>
-  </body>
+</body>
 </html>
